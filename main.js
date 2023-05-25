@@ -247,25 +247,107 @@ inputTelefone.addEventListener('change', validaTelefone);
   1- obrigatóriamente ele tem que ter 11 digitos.
   2- os ultimos 2 digitos são números de validação do cpf.
   3- cada digito desses ultimos 2 digitos tem sua validação.
-  4- validação do 1 digito, 059305307-93, vc pega o valor 10 e começa a multiplicar no primeiro numero do cpf e diminui a cada numero o 10 -1 ou seja, 0x10, 5x9, 9x8 .... até o valor do 10 estar em 2. 
+  4- validação do 1 digito, 059305307-93, vc pega o valor 10 e começa a multiplicar no primeiro numero do cpf e diminui a cada numero o 10 -1 ou seja, 0x10, 5x9, 9x8 .... até o valor do 10 estar em 2.
   4.1- soma o resultado de todas essas multiplicações.
   4.2- pegar resultado e multiplicar por 10 e dividir por 11.
-  4.3- o resultado dessa ultima operação tem que ser resto igual ao primeiro digito validador.
+  4.3- o resto dessa ultima operação tem que ser resto igual ao primeiro digito validador.
   4.4- se o resto for 10 ou 11 o digito tem que ser 0.
   4.5- caso esse primeiro digito não seja valido, o cpf ja está  errado e ja pode parar o código.
   5- caso a condição do passo 4 seja verdadeira, vamos repetir a mesma coisa, porém com os 10 primeiros números do cpf e começando  por 11 e multiplicando pelo primeiro digito de forma decrescente,ou seja, 11x0 , 10x5, 9x9 parando quando valor de 11 estiver no 2.
-  5.1-o resultado dessa ultima operação tem que ser resto igual ao primeiro digito validador.
+  5.1-o resultado dessa ultima operação tem que ser resto igual ao segundo digito validador.
   5.2- se o resto for 10 ou 11 o digito tem que ser 0.
 
 
 */
 const inputCpf = document.getElementById('cpf');
-function validaCpf(){
+
+function removeCaracteresInvalidos(){
+  const caracteresValidos = '1234567890';
+  let verificador = false;
+  for(let i = 0; i < caracteresValidos.length; i++){
+    if(inputCpf.value.charAt(inputCpf.value.length -1) == caracteresValidos.charAt(i)){
+      verificador = true;
+    }
+  }
+  if(verificador == false){
+    inputCpf.value = inputCpf.value.replace(inputCpf.value.charAt(inputCpf.value.length -1), '');
+  }
+}
+
+function limitaNumeroCpf(){
+  if(inputCpf.value.length > 11){
+    inputCpf.value = inputCpf.value.substring(0, 11);
+  }
+}
+
+function preparaCpf(){
+  removeCaracteresInvalidos();
+  limitaNumeroCpf();
 
 }
 
+function validaCpf(){
+  if(inputCpf.value.length != 11){
+    console.error('CPF tem que ter 11 números!');
+    return;
+  }
+  
+  if(inputCpf.value == '00000000000'){
+    console.error('tenta outra espertinho!');
+    return;
+  }
+//059305307-93
+let contador= 0
+let soma = 0;
+  for(let i = 10; i >= 2; i--){
+    soma += inputCpf.value.charAt(contador) * i;
+    contador++;
+  }
 
+  let resto = (soma*10)%11;
+  
+  if(resto != inputCpf.value.charAt(9) && inputCpf.value.charAt(9) != '0'){
+    console.error('CPF invalido!');
+    return;
+  }
 
+  if(inputCpf.value.charAt(9) == '0'){
+    if(resto != 11 && resto != 10 && resto != 0){
+      console.error('CPF invalido');
+      return;
+    }
+  }
+
+  contador = 0;
+  soma = 0;
+  for(let i = 11; i >= 2; i--){
+    soma += inputCpf.value.charAt(contador) * i;
+    contador++;
+  }
+  //console.log(soma2);
+  
+  resto = (soma*10)%11;
+
+  if(resto != inputCpf.value.charAt(10) && inputCpf.value.charAt(10) != '0'){
+    console.error('CPF invalido!');
+    return;
+  }
+
+  if(inputCpf.value.charAt(10) == '0'){
+    if(resto != 11 && resto != 10 && resto != 0){
+      console.error('CPF invalido');
+      return;
+    }
+  }
+  inputCpf.value = inputCpf.value.substring(0, 3) + '.' + inputCpf.value.substring(3, 6) + '.' + inputCpf.value.substring(6, 9) + '-' + inputCpf.value.substring(9);
+  
+  console.log(inputCpf.value);
+  //alert('CPF valido!')
+
+}
+/*DEVER DE CASA DEPOIS DO CPF ESTÁ VALIDO VC TEM QUE FORMATAR SEU CPF 059.305.307-93*/
+inputCpf.addEventListener('keyup', preparaCpf);
+inputCpf.addEventListener('change', validaCpf);
 
 
 
